@@ -21,7 +21,10 @@
             </.link>
             <.link
               navigate={~p"/users/settings"}
-              class="btn btn-primary btn-ghost btn-sm btn-circle "
+              class={[
+                "btn btn-secondary btn-sm btn-circle",
+                if(assigns[:route] == :settings, do: nil, else: "btn-ghost")
+              ]}
             >
               <.icon name="hero-cog" />
             </.link>
