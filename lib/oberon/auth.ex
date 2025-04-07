@@ -77,6 +77,7 @@ defmodule Oberon.Auth do
   def register_user(attrs) do
     %User{}
     |> User.email_changeset(attrs)
+    |> User.display_name_changeset(attrs)
     |> Repo.insert()
   end
 

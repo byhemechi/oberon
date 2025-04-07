@@ -4,6 +4,7 @@ defmodule Oberon.Auth.User do
 
   schema "users" do
     field :email, :string
+    field :display_name, :string
     field :password, :string, virtual: true, redact: true
     field :hashed_password, :string, redact: true
     field :current_password, :string, virtual: true, redact: true
@@ -11,6 +12,17 @@ defmodule Oberon.Auth.User do
     field :authenticated_at, :utc_datetime, virtual: true
 
     timestamps(type: :utc_datetime)
+  end
+
+  @doc """
+  A user changeset for updating the display name.
+
+  It requires the display_name to be provided.
+  """
+  def display_name_changeset(user, attrs, opts \\ []) do
+    user
+    |> cast(attrs, [:display_name])
+    |> validate_required([:display_name])
   end
 
   @doc """

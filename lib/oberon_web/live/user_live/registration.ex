@@ -21,16 +21,17 @@ defmodule OberonWeb.UserLive.Registration do
 
         <.form for={@form} id="registration_form" phx-submit="save" phx-change="validate">
           <.input
-            field={@form[:email]}
-            type="email"
-            label="Email"
-            autocomplete="username"
+            field={@form[:display_name]}
+            type="text"
+            label="Name"
+            autocomplete="name"
             required
             phx-mounted={JS.focus()}
           />
+          <.input field={@form[:email]} type="email" label="Email" autocomplete="username" required />
 
           <.button variant="primary" phx-disable-with="Creating account..." class="w-full">
-            Create an account
+            {gettext("Create account")}
           </.button>
         </.form>
       </div>
@@ -44,7 +45,10 @@ defmodule OberonWeb.UserLive.Registration do
   end
 
   def mount(_params, _session, socket) do
-    changeset = Auth.change_user_email(%User{})
+    changeset =
+      %User{}
+      |> Auth.change_user_email()
+      |> User.display_name_changeset(%{})
 
     {:ok, assign_form(socket, changeset), temporary_assigns: [form: nil]}
   end
@@ -72,7 +76,11 @@ defmodule OberonWeb.UserLive.Registration do
   end
 
   def handle_event("validate", %{"user" => user_params}, socket) do
-    changeset = Auth.change_user_email(%User{}, user_params)
+    changeset =
+      %User{}
+      |> Auth.change_user_email(user_params)
+      |> User.display_name_changeset(user_params)
+
     {:noreply, assign_form(socket, Map.put(changeset, :action, :validate))}
   end
 

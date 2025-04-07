@@ -7,7 +7,7 @@ defmodule OberonWeb.UserLive.Confirmation do
     ~H"""
     <Layouts.app flash={@flash} current_scope={@current_scope}>
       <div class="mx-auto max-w-sm">
-        <.header class="text-center">Welcome {@user.email}</.header>
+        <.header class="text-center">{gettext("Hi, %{name}", name: @user.display_name)}</.header>
 
         <.form
           :if={!@user.confirmed_at}
