@@ -7,6 +7,19 @@
 # General application configuration
 import Config
 
+config :oberon, :scopes,
+  user: [
+    default: true,
+    module: Oberon.Auth.Scope,
+    assign_key: :current_scope,
+    access_path: [:user, :id],
+    schema_key: :user_id,
+    schema_type: :id,
+    schema_table: :users,
+    test_data_fixture: Oberon.AuthFixtures,
+    test_login_helper: :register_and_log_in_user
+  ]
+
 config :oberon,
   ecto_repos: [Oberon.Repo],
   generators: [timestamp_type: :utc_datetime]
