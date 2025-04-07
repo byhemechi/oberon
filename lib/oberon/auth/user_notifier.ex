@@ -9,7 +9,7 @@ defmodule Oberon.Auth.UserNotifier do
     email =
       new()
       |> to(recipient)
-      |> from({"Oberon", "contact@example.com"})
+      |> from({"Oberon", "oberon-noreply@em8196.byhe.me"})
       |> subject(subject)
       |> text_body(body)
 
