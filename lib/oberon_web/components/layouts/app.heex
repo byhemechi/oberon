@@ -9,23 +9,37 @@
       </li>
       <li>
         <%= if @current_scope do %>
-          <.link
-            navigate={~p"/users/settings"}
-            class="btn btn-ghost btn-primary max-sm:px-0 max-sm:aspect-square rounded-full"
-          >
-            <.icon name="hero-user" />
-            <span class="hidden md:inline">
-              {@current_scope.user.display_name}
-            </span>
-          </.link>
+          <div class="tabs tabs-box flex items-center gap-0.5 rounded-full">
+            <.link
+              navigate={~p"/users/settings"}
+              class="btn btn-sm btn-secondary btn-ghost max-sm:px-0 max-sm:aspect-square"
+            >
+              <.icon name="hero-user" />
+              <span class="hidden md:inline">
+                {@current_scope.user.display_name}
+              </span>
+            </.link>
+            <.link
+              navigate={~p"/users/settings"}
+              class="btn btn-primary btn-ghost btn-sm btn-circle "
+            >
+              <.icon name="hero-cog" />
+            </.link>
+            <.link
+              navigate={~p"/users/log-out"}
+              class="btn btn-ghost btn-sm btn-error btn-circle "
+            >
+              <.icon name="hero-arrow-left-end-on-rectangle" />
+            </.link>
+          </div>
         <% else %>
           <li>
             <.link
               navigate={~p"/users/log-in"}
-              class="btn btn-primary max-sm:px-0 max-sm:aspect-square rounded-full"
+              class="btn btn-primary max-sm:btn-circle rounded-full"
               aria-label={gettext("Log In")}
             >
-              <.icon name="hero-user-plus" />
+              <.icon name="hero-arrow-left-end-on-rectangle" />
               <span class="hidden md:inline">{gettext("Log In")}</span>
             </.link>
           </li>

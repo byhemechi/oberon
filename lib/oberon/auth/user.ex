@@ -19,10 +19,11 @@ defmodule Oberon.Auth.User do
 
   It requires the display_name to be provided.
   """
-  def display_name_changeset(user, attrs, opts \\ []) do
+  def display_name_changeset(user, attrs) do
     user
     |> cast(attrs, [:display_name])
     |> validate_required([:display_name])
+    |> validate_length(:display_name, min: 3, max: 24)
   end
 
   @doc """
