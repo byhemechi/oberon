@@ -21,6 +21,7 @@ defmodule OberonWeb.Router do
     pipe_through :browser
 
     get "/", PageController, :home
+    get "/healthz", HealthCheckController, :healthz
   end
 
   # Other scopes may use custom stacks.
