@@ -26,15 +26,10 @@ msgstr ""
 msgid "Hang in there while we get back on track"
 msgstr ""
 
-#: lib/oberon_web/components/layouts/app.heex:41
-#: lib/oberon_web/components/layouts/app.heex:44
+#: lib/oberon_web/components/layouts/app.heex:50
+#: lib/oberon_web/components/layouts/app.heex:53
 #, elixir-autogen, elixir-format
 msgid "Log In"
-msgstr ""
-
-#: lib/oberon_web/components/layouts/app.heex:32
-#, elixir-autogen, elixir-format
-msgid "Log out"
 msgstr ""
 
 #: lib/oberon_web/components/layouts.ex:45
@@ -55,4 +50,14 @@ msgstr ""
 #: lib/oberon_web/live/user_live/registration.ex:34
 #, elixir-autogen, elixir-format
 msgid "Create account"
-msgstr "Sign up"
+msgstr ""
+
+#: lib/oberon_web/live/user_live/settings.ex:171
+#, elixir-autogen, elixir-format
+msgid "Display name updated!"
+msgstr ""
+
+#: lib/oberon_web/live/user_live/confirmation.ex:10
+#, elixir-autogen, elixir-format
+msgid "Hi, %{name}"
+msgstr ""

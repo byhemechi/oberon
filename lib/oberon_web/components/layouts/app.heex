@@ -1,7 +1,19 @@
-<header class="navbar px-4 sm:px-6 lg:px-8 max-w-screen-lg mx-auto">
+<header class="navbar px-4 sm:px-6 lg:px-8 max-w-screen-lg mx-auto gap-4">
   <.link navigate={~p"/"} class="flex gap-2 w-max">
-    <div href="/" class="flex-1 flex items-center gap-2 logo size-8" />
+    <img
+      src={~p"/images/logo.webp"}
+      class="flex-1 flex items-center gap-2 size-16 object-contain"
+    />
   </.link>
+  <nav :if={@current_scope} class="tabs tabs-box tabs-sm">
+    <.link navigate={~p"/"} class={["tab", assigns[:route] == :purchases && "tab-active"]}>
+      Purchases
+    </.link>
+
+    <.link navigate={~p"/"} class={["tab", assigns[:route] == :proposals && "tab-active"]}>
+      Proposals
+    </.link>
+  </nav>
   <div class="flex-none ml-auto">
     <ul class="flex flex-column px-1 space-x-2 items-center">
       <li>
@@ -9,7 +21,7 @@
       </li>
       <li>
         <%= if @current_scope do %>
-          <div class="tabs tabs-box flex items-center gap-0.5 rounded-full">
+          <div class="tabs tabs-box tabs-sm flex items-center gap-0.5 rounded-full">
             <.link
               navigate={~p"/users/settings"}
               class="btn btn-sm btn-secondary btn-ghost max-sm:px-0 max-sm:aspect-square"
@@ -52,8 +64,11 @@
   </div>
 </header>
 
-<main class="px-4 py-20 sm:px-6 lg:px-8">
+<%= if assigns[:container] !== false do %>
+  <main class="px-4 py-20 sm:px-6 lg:px-8 max-w-screen-lg mx-auto">
+    {render_slot(@inner_block)}
+  </main>
+<% else %>
   {render_slot(@inner_block)}
-</main>
-
+<% end %>
 <.flash_group flash={@flash} />

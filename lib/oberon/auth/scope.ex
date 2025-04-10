@@ -18,7 +18,7 @@ defmodule Oberon.Auth.Scope do
 
   alias Oberon.Auth.User
 
-  defstruct user: nil
+  defstruct user: nil, is_horan: false
 
   @doc """
   Creates a scope for the given user.

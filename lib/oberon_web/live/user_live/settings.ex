@@ -29,7 +29,9 @@ defmodule OberonWeb.UserLive.Settings do
           autocomplete="name"
           required
         />
-        <.button variant="primary" phx-disable-with="Changing...">Change Display Name</.button>
+        <.button variant="primary" phx-disable-with="Changing...">
+          Save Display Name
+        </.button>
       </.form>
 
       <div class="divider" />
@@ -168,7 +170,7 @@ defmodule OberonWeb.UserLive.Settings do
          socket
          |> assign(display_name_form: to_form(changeset))
          |> assign(:current_scope, Scope.for_user(user))
-         |> put_flash(:ok, gettext("Display name updated!"))}
+         |> put_flash(:info, gettext("Display name updated!"))}
 
       changeset ->
         {:noreply, assign(socket, password_form: to_form(changeset, action: :insert))}
