@@ -75,7 +75,14 @@ defmodule Oberon.MixProject do
       "ecto.setup": ["ecto.create", "ecto.migrate", "run priv/repo/seeds.exs"],
       "ecto.reset": ["ecto.drop", "ecto.setup"],
       test: ["ecto.create --quiet", "ecto.migrate --quiet", "test"],
-      "assets.setup": ["tailwind.install --if-missing", "esbuild.install --if-missing"],
+      "fonts.download": [
+        "fonts.download ibm-plex-sans"
+      ],
+      "assets.setup": [
+        "fonts.download",
+        "tailwind.install --if-missing",
+        "esbuild.install --if-missing"
+      ],
       "assets.build": ["tailwind oberon", "esbuild oberon"],
       "assets.deploy": [
         "tailwind oberon --minify",
