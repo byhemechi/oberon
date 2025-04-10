@@ -68,6 +68,8 @@ defmodule OberonWeb.Layouts do
         <button
           phx-click={JS.dispatch("phx:set-theme", detail: %{theme: "system"})}
           class="flex p-2 cursor-pointer"
+          aria-label="Use system theme"
+          title="Use system theme"
         >
           <.icon name="hero-computer-desktop-micro" class="size-4 opacity-75 hover:opacity-100" />
         </button>
@@ -75,6 +77,8 @@ defmodule OberonWeb.Layouts do
         <button
           phx-click={JS.dispatch("phx:set-theme", detail: %{theme: "light"})}
           class="flex p-2 cursor-pointer"
+          aria-label="Use light theme"
+          title="Use light theme"
         >
           <.icon name="hero-sun-micro" class="size-4 opacity-75 hover:opacity-100" />
         </button>
@@ -82,6 +86,8 @@ defmodule OberonWeb.Layouts do
         <button
           phx-click={JS.dispatch("phx:set-theme", detail: %{theme: "dark"})}
           class="flex p-2 cursor-pointer"
+          aria-label="Use dark theme"
+          title="Use dark theme"
         >
           <.icon name="hero-moon-micro" class="size-4 opacity-75 hover:opacity-100" />
         </button>
