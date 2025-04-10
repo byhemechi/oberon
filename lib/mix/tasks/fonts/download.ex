@@ -1,5 +1,4 @@
 defmodule Mix.Tasks.Fonts.Download do
-  alias Postgrex.Extensions.BitString
   require Logger
   use Mix.Task
 
@@ -33,7 +32,7 @@ defmodule Mix.Tasks.Fonts.Download do
     expected_sha_sum = Base.decode16!(expected_sha_sum, case: :lower)
     sha_sum = :crypto.hash(:sha, tarball)
 
-    unless expected_sha_sum == sha_sum do
+    if expected_sha_sum != sha_sum do
       IO.inspect({expected_sha_sum, sha_sum})
       raise "Checksum did not match"
     else
