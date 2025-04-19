@@ -103,6 +103,7 @@
 
 @theme {
   --font-plex: "IBM Plex Sans", var(--font-sans);
+  --color-brand: var(--color-primary);
 }
 
 @utility logo {

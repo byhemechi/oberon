@@ -55,8 +55,8 @@ defmodule OberonWeb.Router do
       on_mount: [{OberonWeb.UserAuth, :require_authenticated}] do
       live "/projects", ProjectLive.Index, :index
       live "/projects/new", ProjectLive.Form, :new
-      live "/projects/:id", ProjectLive.Show, :show
-      live "/projects/:id/edit", ProjectLive.Form, :edit
+      live "/projects/!:id", ProjectLive.Show, :show
+      live "/projects/!:id/edit", ProjectLive.Form, :edit
 
       live "/users/settings", UserLive.Settings, :edit
       live "/users/settings/confirm-email/:token", UserLive.Settings, :confirm_email

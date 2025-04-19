@@ -11,21 +11,11 @@ defmodule Oberon.ProjectsTest do
 
     @invalid_attrs %{title: nil, price: nil}
 
-    test "list_projects/1 returns all scoped projects" do
-      scope = user_scope_fixture()
-      other_scope = user_scope_fixture()
-      project = project_fixture(scope)
-      other_project = project_fixture(other_scope)
-      assert Projects.list_projects(scope) == [project]
-      assert Projects.list_projects(other_scope) == [other_project]
-    end
-
     test "get_project!/2 returns the project with given id" do
       scope = user_scope_fixture()
       project = project_fixture(scope)
       other_scope = user_scope_fixture()
       assert Projects.get_project!(scope, project.id) == project
-      assert_raise Ecto.NoResultsError, fn -> Projects.get_project!(other_scope, project.id) end
     end
 
     test "create_project/2 with valid data creates a project" do
@@ -33,9 +23,8 @@ defmodule Oberon.ProjectsTest do
       scope = user_scope_fixture()
 
       assert {:ok, %Project{} = project} = Projects.create_project(scope, valid_attrs)
-      assert project.description == "some description"
       assert project.title == "some title"
-      assert project.price == 120.5
+      assert project.price == Decimal.new("120.5")
       assert project.user_id == scope.user.id
     end
 
@@ -50,9 +39,8 @@ defmodule Oberon.ProjectsTest do
       update_attrs = %{title: "some updated title", price: 456.7}
 
       assert {:ok, %Project{} = project} = Projects.update_project(scope, project, update_attrs)
-      assert project.description == "some updated description"
       assert project.title == "some updated title"
-      assert project.price == 456.7
+      assert project.price == Decimal.new("456.7")
     end
 
     test "update_project/3 with invalid scope raises" do

@@ -5,6 +5,13 @@ defmodule Oberon.Projects.Project do
   schema "projects" do
     field :title, :string
 
+    field :kind, Ecto.Enum,
+      values: [
+        :purchase,
+        :project
+      ],
+      default: :project
+
     field :state, Ecto.Enum,
       values: [
         :proposal,
@@ -14,10 +21,11 @@ defmodule Oberon.Projects.Project do
         :in_progress,
         :paused,
         :completed
-      ]
+      ],
+      default: :proposal
 
     field :price, :decimal
-    field :user_id, :id
+    belongs_to :user, Oberon.Auth.User
 
     timestamps(type: :utc_datetime)
   end
@@ -25,8 +33,8 @@ defmodule Oberon.Projects.Project do
   @doc false
   def changeset(project, attrs, user_scope) do
     project
-    |> cast(attrs, [:title, :price])
-    |> validate_required([:title, :price])
+    |> cast(attrs, [:title, :price, :state])
+    |> validate_required([:title, :price, :state])
     |> put_change(:user_id, user_scope.user.id)
   end
 end

@@ -40,8 +40,12 @@ defmodule Oberon.Projects do
       [%Project{}, ...]
 
   """
-  def list_projects(%Scope{} = scope) do
-    Repo.all(from project in Project, where: project.user_id == ^scope.user.id)
+  def list_projects(%Scope{user: nil}) do
+    []
+  end
+
+  def list_projects(%Scope{}, state \\ :proposal) do
+    Repo.all(from(project in Project, preload: [:user], where: project.state == ^state))
   end
 
   @doc """
@@ -58,8 +62,8 @@ defmodule Oberon.Projects do
       ** (Ecto.NoResultsError)
 
   """
-  def get_project!(%Scope{} = scope, id) do
-    Repo.get_by!(Project, id: id, user_id: scope.user.id)
+  def get_project!(%Scope{}, id) do
+    Repo.get_by!(Project |> preload([:user]), id: id)
   end
 
   @doc """
@@ -121,7 +125,7 @@ defmodule Oberon.Projects do
 
   """
   def delete_project(%Scope{} = scope, %Project{} = project) do
-    true = project.user_id == scope.user.id
+    true = project.user_id == scope.user.id || scope.can_remove_proposals
 
     with {:ok, project = %Project{}} <-
            Repo.delete(project) do

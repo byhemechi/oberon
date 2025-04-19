@@ -6,11 +6,15 @@ defmodule OberonWeb.ProjectLive.Index do
   @impl true
   def render(assigns) do
     ~H"""
-    <Layouts.app flash={@flash} current_scope={@current_scope}>
+    <Layouts.app {assigns}>
       <.header>
         Listing Projects
         <:actions>
-          <.button variant="primary" navigate={~p"/projects/new"}>
+          <.button
+            :if={@current_scope.can_create_proposals}
+            variant="primary"
+            navigate={~p"/projects/new"}
+          >
             <.icon name="hero-plus" /> New Project
           </.button>
         </:actions>
@@ -19,22 +23,29 @@ defmodule OberonWeb.ProjectLive.Index do
       <.table
         id="projects"
         rows={@streams.projects}
-        row_click={fn {_id, project} -> JS.navigate(~p"/projects/#{project}") end}
+        row_click={fn {_id, project} -> JS.navigate(~p"/projects/!#{project}") end}
       >
         <:col :let={{_id, project}} label="Title">{project.title}</:col>
+        <:col :let={{_id, project}} label="Kind">
+          {project.kind}
+        </:col>
         <:col :let={{_id, project}} label="Price">{project.price}</:col>
+        <:col :let={{_id, project}} label="Created By">{project.user.display_name}</:col>
         <:action :let={{_id, project}}>
           <div class="sr-only">
-            <.link navigate={~p"/projects/#{project}"}>Show</.link>
+            <.link navigate={~p"/projects/!#{project}"}>Show</.link>
           </div>
-          <.link navigate={~p"/projects/#{project}/edit"}>Edit</.link>
+          <.link navigate={~p"/projects/!#{project}/edit"}>Edit</.link>
         </:action>
         <:action :let={{id, project}}>
           <.link
+            class={!@current_scope.can_remove_proposals && "hidden"}
             phx-click={JS.push("delete", value: %{id: project.id}) |> hide("##{id}")}
             data-confirm="Are you sure?"
+            title="delete"
+            data-action="delete"
           >
-            Delete
+            <.icon name="hero-trash" />
           </.link>
         </:action>
       </.table>
@@ -49,6 +60,7 @@ defmodule OberonWeb.ProjectLive.Index do
     {:ok,
      socket
      |> assign(:page_title, "Listing Projects")
+     |> assign(:route, :projects)
      |> stream(:projects, Projects.list_projects(socket.assigns.current_scope))}
   end
 

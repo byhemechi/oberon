@@ -6,7 +6,7 @@ defmodule OberonWeb.ProjectLive.Show do
   @impl true
   def render(assigns) do
     ~H"""
-    <Layouts.app flash={@flash} current_scope={@current_scope}>
+    <Layouts.app {assigns} route={:projects}>
       <.header>
         Project {@project.id}
         <:subtitle>This is a project record from your database.</:subtitle>
@@ -14,8 +14,22 @@ defmodule OberonWeb.ProjectLive.Show do
           <.button navigate={~p"/projects"}>
             <.icon name="hero-arrow-left" />
           </.button>
-          <.button variant="primary" navigate={~p"/projects/#{@project}/edit?return_to=show"}>
-            <.icon name="hero-pencil-square" /> Edit project
+          <.button
+            :if={@current_scope.can_edit_proposals || @current_scope.user.id == @project.user_id}
+            variant="primary"
+            navigate={~p"/projects/!#{@project}/edit?return_to=show"}
+          >
+            <.icon name="hero-pencil-square" />
+
+            {gettext("Edit %{state}",
+              state:
+                case @project do
+                  %{state: :proposal} -> gettext("proposal")
+                  %{kind: :project} -> gettext("project")
+                  %{kind: :purchase} -> gettext("purchase")
+                  _ -> gettext("project")
+                end
+            )}
           </.button>
         </:actions>
       </.header>
@@ -23,6 +37,7 @@ defmodule OberonWeb.ProjectLive.Show do
       <.list>
         <:item title="Title">{@project.title}</:item>
         <:item title="Price">{@project.price}</:item>
+        <:item title="Created by">{@project.user.display_name}</:item>
       </.list>
     </Layouts.app>
     """
@@ -35,6 +50,7 @@ defmodule OberonWeb.ProjectLive.Show do
     {:ok,
      socket
      |> assign(:page_title, "Show Project")
+     |> assign(:route, :projects)
      |> assign(:project, Projects.get_project!(socket.assigns.current_scope, id))}
   end
 

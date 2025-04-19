@@ -11,7 +11,8 @@ defmodule Oberon.ProjectsFixtures do
     attrs =
       Enum.into(attrs, %{
         price: 120.5,
-        title: "some title"
+        title: "some title",
+        state: :proposal
       })
 
     {:ok, project} = Oberon.Projects.create_project(scope, attrs)

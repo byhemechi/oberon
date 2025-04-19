@@ -45,7 +45,7 @@ defmodule OberonWeb.ProjectLiveTest do
                form_live
                |> form("#project-form", project: @create_attrs)
                |> render_submit()
-               |> follow_redirect(conn, ~p"/projects")
+               |> follow_redirect(conn)
 
       html = render(index_live)
       assert html =~ "Project created successfully"
@@ -59,7 +59,7 @@ defmodule OberonWeb.ProjectLiveTest do
                index_live
                |> element("#projects-#{project.id} a", "Edit")
                |> render_click()
-               |> follow_redirect(conn, ~p"/projects/#{project}/edit")
+               |> follow_redirect(conn, ~p"/projects/!#{project}/edit")
 
       assert render(form_live) =~ "Edit Project"
 
@@ -81,7 +81,10 @@ defmodule OberonWeb.ProjectLiveTest do
     test "deletes project in listing", %{conn: conn, project: project} do
       {:ok, index_live, _html} = live(conn, ~p"/projects")
 
-      assert index_live |> element("#projects-#{project.id} a", "Delete") |> render_click()
+      assert index_live
+             |> element("#projects-#{project.id} a[data-action=delete]")
+             |> render_click()
+
       refute has_element?(index_live, "#projects-#{project.id}")
     end
   end
@@ -90,20 +93,20 @@ defmodule OberonWeb.ProjectLiveTest do
     setup [:create_project]
 
     test "displays project", %{conn: conn, project: project} do
-      {:ok, _show_live, html} = live(conn, ~p"/projects/#{project}")
+      {:ok, _show_live, html} = live(conn, ~p"/projects/!#{project}")
 
       assert html =~ "Show Project"
       assert html =~ project.title
     end
 
     test "updates project and returns to show", %{conn: conn, project: project} do
-      {:ok, show_live, _html} = live(conn, ~p"/projects/#{project}")
+      {:ok, show_live, _html} = live(conn, ~p"/projects/!#{project}")
 
       assert {:ok, form_live, _} =
                show_live
                |> element("a", "Edit")
                |> render_click()
-               |> follow_redirect(conn, ~p"/projects/#{project}/edit?return_to=show")
+               |> follow_redirect(conn, ~p"/projects/!#{project}/edit?return_to=show")
 
       assert render(form_live) =~ "Edit Project"
 
@@ -115,7 +118,7 @@ defmodule OberonWeb.ProjectLiveTest do
                form_live
                |> form("#project-form", project: @update_attrs)
                |> render_submit()
-               |> follow_redirect(conn, ~p"/projects/#{project}")
+               |> follow_redirect(conn, ~p"/projects/!#{project}")
 
       html = render(show_live)
       assert html =~ "Project updated successfully"

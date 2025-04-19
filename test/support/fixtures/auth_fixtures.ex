@@ -14,7 +14,8 @@ defmodule Oberon.AuthFixtures do
 
   def valid_user_attributes(attrs \\ %{}) do
     Enum.into(attrs, %{
-      email: unique_user_email()
+      email: unique_user_email(),
+      display_name: "John Smith"
     })
   end
 

@@ -10,6 +10,7 @@ defmodule Oberon.Auth.User do
     field :current_password, :string, virtual: true, redact: true
     field :confirmed_at, :utc_datetime
     field :authenticated_at, :utc_datetime, virtual: true
+    field :role, Ecto.Enum, values: [:guest, :horan, :admin]
 
     timestamps(type: :utc_datetime)
   end

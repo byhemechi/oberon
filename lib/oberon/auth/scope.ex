@@ -18,13 +18,51 @@ defmodule Oberon.Auth.Scope do
 
   alias Oberon.Auth.User
 
-  defstruct user: nil, is_horan: false
+  defstruct user: nil,
+            can_create_proposals: false,
+            can_edit_proposals: false,
+            can_remove_proposals: false,
+            can_vote: false,
+            can_create_payments: false,
+            can_remove_comments: false
 
   @doc """
   Creates a scope for the given user.
 
   Returns nil if no user is given.
   """
+  def for_user(user)
+
+  def for_user(%User{role: :admin} = user) do
+    %__MODULE__{
+      user: user,
+      can_create_proposals: true,
+      can_edit_proposals: true,
+      can_vote: true,
+      can_create_payments: true,
+      can_remove_comments: true,
+      can_remove_proposals: true
+    }
+  end
+
+  def for_user(%User{role: :horan} = user) do
+    %__MODULE__{
+      user: user,
+      can_create_proposals: true,
+      can_vote: true,
+      can_create_payments: true
+    }
+  end
+
+  def for_user(%User{role: :guest} = user) do
+    %__MODULE__{
+      user: user,
+      can_create_proposals: true,
+      can_vote: false,
+      can_create_payments: true
+    }
+  end
+
   def for_user(%User{} = user) do
     %__MODULE__{user: user}
   end

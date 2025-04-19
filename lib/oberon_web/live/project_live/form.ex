@@ -7,7 +7,7 @@ defmodule OberonWeb.ProjectLive.Form do
   @impl true
   def render(assigns) do
     ~H"""
-    <Layouts.app flash={@flash} current_scope={@current_scope}>
+    <Layouts.app {assigns} route={:projects}>
       <.header>
         {@page_title}
         <:subtitle>Use this form to manage project records in your database.</:subtitle>
@@ -95,15 +95,13 @@ defmodule OberonWeb.ProjectLive.Form do
         {:noreply,
          socket
          |> put_flash(:info, "Project created successfully")
-         |> push_navigate(
-           to: return_path(socket.assigns.current_scope, socket.assigns.return_to, project)
-         )}
+         |> push_navigate(to: ~p"/projects/!#{project.id}")}
 
       {:error, %Ecto.Changeset{} = changeset} ->
-        {:noreply, assign(socket, form: to_form(changeset))}
+        {:noreply, assign(socket, form: to_form(changeset |> IO.inspect()))}
     end
   end
 
   defp return_path(_scope, "index", _project), do: ~p"/projects"
-  defp return_path(_scope, "show", project), do: ~p"/projects/#{project}"
+  defp return_path(_scope, "show", project), do: ~p"/projects/!#{project}"
 end
