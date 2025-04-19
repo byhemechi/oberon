@@ -18,4 +18,21 @@ defmodule Oberon.ProjectsFixtures do
     {:ok, project} = Oberon.Projects.create_project(scope, attrs)
     project
   end
+
+  @doc """
+  Generate a attachment.
+  """
+  def attachment_fixture(attrs \\ %{}) do
+    {:ok, attachment} =
+      attrs
+      |> Enum.into(%{
+        name: "some name",
+        placeholder: "some placeholder",
+        type: "some type",
+        value: "some value"
+      })
+      |> Oberon.Projects.create_attachment()
+
+    attachment
+  end
 end

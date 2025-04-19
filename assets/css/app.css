@@ -111,6 +111,14 @@
   background: var(--color-primary);
 }
 
+@utility upload {
+  @apply card snap-center bg-base-200 transition ring-primary hover:ring-3 hover:text-primary-content hover:bg-primary;
+}
+
 :root {
   @apply antialiased font-plex;
+}
+
+lazy-img {
+  display: contents;
 }

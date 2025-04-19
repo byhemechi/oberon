@@ -27,6 +27,7 @@ defmodule Oberon.Projects.Project do
     field :price, :decimal
     belongs_to :user, Oberon.Auth.User
 
+    has_many :attachments, Oberon.Projects.Attachment
     timestamps(type: :utc_datetime)
   end
 
@@ -34,6 +35,7 @@ defmodule Oberon.Projects.Project do
   def changeset(project, attrs, user_scope) do
     project
     |> cast(attrs, [:title, :price, :state])
+    |> cast_assoc(:attachments)
     |> validate_required([:title, :price, :state])
     |> put_change(:user_id, user_scope.user.id)
   end
