@@ -15,9 +15,12 @@ class LazyFadeIn extends HTMLElement {
   connectedCallback() {
     if (!this.img || this.img.complete) return this.hidePlaceholder();
 
-    const animation = this.img.animate([{ opacity: 0 }, { opacity: 1 }], {
-      duration: 200,
-    });
+    const animation = this.img.animate(
+      [{ opacity: 0, "--tw-blur": "blur(8px)" }, { opacity: 1 }],
+      {
+        duration: 200,
+      }
+    );
 
     animation.pause();
 

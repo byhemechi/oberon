@@ -1,4 +1,6 @@
 defmodule OberonWeb.ProjectLive.Form do
+  alias Oberon.Repo
+  alias Oberon.Projects.Attachment
   use OberonWeb, :live_view
 
   alias Oberon.Projects
@@ -14,17 +16,22 @@ defmodule OberonWeb.ProjectLive.Form do
     <Layouts.app {assigns} route={:projects}>
       <.header>
         {@page_title}
-        <:subtitle>Use this form to manage project records in your database.</:subtitle>
       </.header>
 
-      <.form for={@form} id="project-form" phx-change="validate" phx-submit="save">
+      <.form
+        for={@form}
+        id="project-form"
+        phx-change="validate"
+        phx-submit="save"
+        class="flex flex-col gap-2"
+      >
         <.input field={@form[:title]} type="text" label="Title" />
         <.input field={@form[:price]} type="number" label="Price" step="any" />
 
         <label
           for={@uploads.attachments.ref}
           phx-drop-target={@uploads.attachments.ref}
-          class="border-2 block border-dashed border-base-300 rounded-lg p-6 text-center transition-colors"
+          class="border-2 block border-dashed border-base-content/20 rounded-lg p-6 text-center transition-colors"
         >
           <div class="flex flex-col items-center justify-center gap-4">
             <.icon name="hero-photo-solid" class="h-12 w-12 text-zinc-400" />
@@ -36,36 +43,77 @@ defmodule OberonWeb.ProjectLive.Form do
           </div>
         </label>
 
-        <%= for entry <- @uploads.attachments.entries do %>
-          <article class="card p-4 bg-base-200">
-            <.live_img_preview entry={entry} class="w-32 h-32 object-cover rounded" />
+        <div class={[
+          "flex gap-2 flex-wrap"
+        ]}>
+          <%= for attachment <- @project.attachments ++ @uploads.attachments.entries do %>
+            <%= case attachment do %>
+              <% %Attachment{name: name} -> %>
+                <div class="upload size-36 group" id={"attachment-#{attachment.id}"}>
+                  <.icon name="hero-document" />
+                  <div class="card-title max-w-32 text-center overflow-ellipsis overflow-hidden">
+                    {name}
+                  </div>
+                  <button
+                    class={[
+                      "btn btn-circle btn-sm",
+                      "absolute -top-3 -right-3 btn-secondary z-40",
+                      "scale-0 group-hover:scale-100 transition"
+                    ]}
+                    type="button"
+                    phx-click={
+                      JS.push("delete-attachment") |> JS.hide(to: "#attachment-#{attachment.id}")
+                    }
+                    value={attachment.id}
+                  >
+                    <.icon name="hero-x-mark" />
+                  </button>
+                </div>
+              <% %Phoenix.LiveView.UploadEntry{valid?: valid?, done?: done?, } -> %>
+                <div
+                  class={[
+                    "upload size-36 group p-4",
+                    !valid? && "ring-error ring-3"
+                  ]}
+                  id={"upload-#{attachment.ref}"}
+                >
+                  <div class="card-body items-center">
+                    <.icon :if={!done?} name="hero-arrow-up-tray" />
+                    <.icon :if={done?} name="hero-check" class="text-success" />
+                    <div class="card-title text-base max-w-32 text-center overflow-ellipsis overflow-hidden">
+                      {attachment.client_name}
+                    </div>
+                    <div
+                      :if={valid? && !done?}
+                      class="w-full rounded-full h-1 bg-base-content/1 0  overflow-hidden"
+                    >
+                      <div
+                        class="bg-primary  h-full rounded-full transition-size"
+                        style={"width: #{attachment.progress}%"}
+                      >
+                      </div>
+                    </div>
+                    <%= for err <- upload_errors(@uploads.attachments, attachment) do %>
+                      <p class="text-error text-sm mt-1">{error_to_string(err)}</p>
+                    <% end %>
+                  </div>
+                  <button
+                    class={[
+                      "btn btn-circle btn-sm",
+                      "absolute -top-3 -right-3 btn-error z-40",
+                      "scale-0 group-hover:scale-100 transition"
+                    ]}
+                    type="button"
+                    phx-click={JS.push("cancel-upload") |> JS.hide(to: "#upload-#{attachment.ref}")}
+                    phx-value-ref={attachment.ref}
+                  >
+                    <.icon name="hero-x-mark" />
+                  </button>
+                </div>
+            <% end %>
+          <% end %>
+        </div>
 
-            <div class="flex flex-col gap-2 flex-1">
-              <p class="font-medium">{entry.client_name}</p>
-              <%!-- entry.progress will update automatically for in-flight entries --%>
-              <div class="w-full rounded-full h-2.5">
-                <div class="bg-brand h-2.5 rounded-full" style={"width: #{entry.progress}%"}></div>
-              </div>
-              <p class="text-xs">{entry.progress}% uploaded</p>
-
-              <%!-- a regular click event whose handler will invoke Phoenix.LiveView.cancel_upload/3 --%>
-              <button
-                type="button"
-                phx-click="cancel-upload"
-                phx-value-ref={entry.ref}
-                aria-label="cancel"
-                class="absolute top-2 right-2 text-zinc-400 hover:text-zinc-200"
-              >
-                <.icon name="hero-x-mark-solid" class="h-5 w-5" />
-              </button>
-
-              <%!-- Phoenix.Component.upload_errors/2 returns a list of error atoms --%>
-              <%= for err <- upload_errors(@uploads.attachments, entry) do %>
-                <p class="text-rose-500 text-sm mt-1">{error_to_string(err)}</p>
-              <% end %>
-            </div>
-          </article>
-        <% end %>
         <footer>
           <.button phx-disable-with="Saving..." variant="primary">Save Project</.button>
           <.button navigate={return_path(@current_scope, @return_to, @project)}>Cancel</.button>
@@ -80,6 +128,7 @@ defmodule OberonWeb.ProjectLive.Form do
     {:ok,
      socket
      |> assign(:return_to, return_to(params["return_to"]))
+     |> assign(:to_delete, [])
      |> allow_upload(:attachments,
        accept: :any,
        max_file_size: 60_000_000,
@@ -102,7 +151,7 @@ defmodule OberonWeb.ProjectLive.Form do
   end
 
   defp apply_action(socket, :new, _params) do
-    project = %Project{user_id: socket.assigns.current_scope.user.id}
+    project = %Project{user_id: socket.assigns.current_scope.user.id, attachments: []}
 
     socket
     |> assign(:page_title, "New Project")
@@ -124,6 +173,12 @@ defmodule OberonWeb.ProjectLive.Form do
 
   def handle_event("cancel-upload", %{"ref" => ref}, socket) do
     {:noreply, cancel_upload(socket, :attachments, ref)}
+  end
+
+  def handle_event("delete-attachment", %{"value" => id}, socket) do
+    {id, _} = Integer.parse(id)
+
+    {:noreply, socket |> assign(to_delete: [id | socket.assigns.to_delete])}
   end
 
   def handle_event("save", %{"project" => project_params}, socket) do
@@ -153,7 +208,12 @@ defmodule OberonWeb.ProjectLive.Form do
      %{
        "value" => ~p"/uploads/" <> dest,
        "name" => entry.client_name,
-       "type" => entry.client_type || "application/octet-stream",
+       "type" =>
+         if !is_nil(entry.client_type) && String.length(entry.client_type) > 0 do
+           entry.client_type
+         else
+           "application/octet-stream"
+         end,
        "dimensions" => {width, Vix.Vips.Image.height(image)},
        "placeholder" =>
          image
@@ -171,7 +231,12 @@ defmodule OberonWeb.ProjectLive.Form do
      %{
        "value" => ~p"/uploads/" <> dest,
        "name" => entry.client_name,
-       "type" => entry.client_type || "application/octet-stream"
+       "type" =>
+         if !is_nil(entry.client_type) && String.length(entry.client_type) > 0 do
+           entry.client_type
+         else
+           "application/octet-stream"
+         end
      }}
   end
 
@@ -201,16 +266,31 @@ defmodule OberonWeb.ProjectLive.Form do
         upload_file(path, entry)
       end)
 
-    case Projects.update_project(
-           socket.assigns.current_scope,
-           socket.assigns.project,
-           project_params
-           |> Map.put(
-             "attachments",
-             uploaded_files ++
-               Enum.map(socket.assigns.project.attachments, &Ecto.embedded_dump(&1, :json))
-           )
-         ) do
+    case Repo.transaction(fn ->
+           project = socket.assigns.project
+
+           project =
+             project
+             |> Map.put(
+               :attachments,
+               project.attachments
+               |> Enum.filter(&(!Enum.member?(socket.assigns.to_delete, &1.id)))
+             )
+
+           {:ok, project} =
+             Projects.update_project(
+               socket.assigns.current_scope,
+               socket.assigns.project,
+               project_params
+               |> Map.put(
+                 "attachments",
+                 Enum.map(project.attachments, &Ecto.embedded_dump(&1, :json)) ++
+                   uploaded_files
+               )
+             )
+
+           project
+         end) do
       {:ok, project} ->
         {:noreply,
          socket
@@ -245,7 +325,7 @@ defmodule OberonWeb.ProjectLive.Form do
          |> push_navigate(to: ~p"/projects/!#{project.id}")}
 
       {:error, %Ecto.Changeset{} = changeset} ->
-        {:noreply, assign(socket, form: to_form(changeset |> IO.inspect()))}
+        {:noreply, assign(socket, form: to_form(changeset))}
     end
   end
 

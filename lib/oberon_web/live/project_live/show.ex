@@ -7,38 +7,36 @@ defmodule OberonWeb.ProjectLive.Show do
   def render(assigns) do
     ~H"""
     <Layouts.app {assigns} route={:projects} container={false}>
-      <div class="max-w-screen-lg mx-auto p-4 px-6 pb-0">
-        <.header>
-          {@project.title}
-          <:subtitle>This is a project record from your database.</:subtitle>
-          <:actions>
-            <.button navigate={~p"/projects"}>
-              <.icon name="hero-arrow-left" />
-            </.button>
-            <.button
-              :if={@current_scope.can_edit_proposals || @current_scope.user.id == @project.user_id}
-              variant="primary"
-              navigate={~p"/projects/!#{@project}/edit?return_to=show"}
-            >
-              <.icon name="hero-pencil-square" />
+      <.header sticky>
+        {@project.title}
+        <:actions>
+          <.button navigate={~p"/projects"}>
+            <.icon name="hero-arrow-left" />
+          </.button>
+          <.button
+            :if={@current_scope.can_edit_proposals || @current_scope.user.id == @project.user_id}
+            variant="primary"
+            navigate={~p"/projects/!#{@project}/edit?return_to=show"}
+          >
+            <.icon name="hero-pencil-square" />
 
-              {gettext("Edit %{state}",
-                state:
-                  case @project do
-                    %{state: :proposal} -> gettext("proposal")
-                    %{kind: :project} -> gettext("project")
-                    %{kind: :purchase} -> gettext("purchase")
-                    _ -> gettext("project")
-                  end
-              )}
-            </.button>
-          </:actions>
-        </.header>
-      </div>
+            {gettext("Edit %{state}",
+              state:
+                case @project do
+                  %{state: :proposal} -> gettext("proposal")
+                  %{kind: :project} -> gettext("project")
+                  %{kind: :purchase} -> gettext("purchase")
+                  _ -> gettext("project")
+                end
+            )}
+          </.button>
+        </:actions>
+      </.header>
+      <div class="max-w-screen-lg mx-auto p-4 px-6 pb-0"></div>
       <div
         :if={length(@project.attachments) > 0}
         class={[
-          "grid auto-rows-[calc(var(--spacing)_*_48)]",
+          "grid auto-rows-[calc(var(--spacing)_*_48)] auto-cols-max",
           "grid-flow-col-dense gap-2 my-4 lg:px-0",
           "overflow-auto snap-x snap-mandatory",
           "p-4 lg:px-[calc(50dvw_-_var(--breakpoint-lg)_/_2_+_var(--spacing)_*_4)]"
@@ -47,14 +45,17 @@ defmodule OberonWeb.ProjectLive.Show do
         <%= for attachment <- @project.attachments do %>
           <%= case attachment do %>
             <% %{type: "link"} -> %>
-              <a href={attachment.value} class="upload w-46 gap-2 items-center justify-center">
+              <a
+                href={attachment.value}
+                class="upload hover:upload-primary w-46 gap-2 items-center justify-center"
+              >
                 <div class="card-title">
                   <.icon name="hero-link" />{attachment.name}
                 </div>
               </a>
             <% %{placeholder: placeholder} when is_binary(placeholder) -> %>
               <a
-                class="upload overflow-clip row-span-2 relative"
+                class="upload  hover:upload-primary overflow-clip row-span-2 relative"
                 href={attachment.value}
                 style={
                   case attachment.dimensions do
@@ -83,7 +84,7 @@ defmodule OberonWeb.ProjectLive.Show do
               <a
                 href={attachment.value}
                 download={Path.basename(attachment.value)}
-                class="upload w-46 gap-2 items-center justify-center"
+                class="upload  hover:upload-primary w-46 gap-2 items-center justify-center"
               >
                 <.icon name="hero-arrow-down-tray" />
                 <div class="card-title">

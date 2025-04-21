@@ -270,6 +270,7 @@ defmodule OberonWeb.CoreComponents do
   Renders a header with title.
   """
   attr :class, :string, default: nil
+  attr :sticky, :boolean, default: false
 
   slot :inner_block, required: true
   slot :subtitle
@@ -277,7 +278,12 @@ defmodule OberonWeb.CoreComponents do
 
   def header(assigns) do
     ~H"""
-    <header class={[@actions != [] && "flex items-center justify-between gap-6", "pb-4", @class]}>
+    <header class={[
+      @actions != [] && "flex items-center justify-between gap-6 ",
+      @sticky &&
+        "max-w-screen-lg mx-auto p-4 px-6 bg-base-100 sticky top-0 z-50 rounded-b-[var(--radius-box)]",
+      @class
+    ]}>
       <div>
         <h1 class="text-lg font-semibold leading-8">
           {render_slot(@inner_block)}

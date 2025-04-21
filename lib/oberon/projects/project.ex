@@ -27,7 +27,10 @@ defmodule Oberon.Projects.Project do
     field :price, :decimal
     belongs_to :user, Oberon.Auth.User
 
-    has_many :attachments, Oberon.Projects.Attachment
+    has_many :attachments, Oberon.Projects.Attachment,
+      on_replace: :delete,
+      preload_order: [asc: :id]
+
     timestamps(type: :utc_datetime)
   end
 
