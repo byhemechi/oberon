@@ -3,9 +3,7 @@ defmodule OberonWeb.ProjectLive.Show do
 
   alias Oberon.Projects
 
-  defp global_link("s3:" <> object), do: "https://s3.sadcloud.co/oberon/#{object}"
-  defp global_link(v), do: v
-
+  import Oberon.Projects.Attachment, only: [global_link: 1]
   @impl true
   def render(assigns) do
     ~H"""

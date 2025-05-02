@@ -47,6 +47,14 @@ defmodule Oberon.Projects.Attachment do
     timestamps(type: :utc_datetime)
   end
 
+  def global_link("s3:" <> object),
+    do:
+      Application.fetch_env!(:oberon, :s3)[:public_url]
+      |> URI.merge(object)
+      |> URI.to_string()
+
+  def global_link(v), do: v
+
   @doc false
   def changeset(attachment, attrs) do
     attachment
