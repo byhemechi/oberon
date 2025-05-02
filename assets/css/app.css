@@ -116,7 +116,7 @@
 }
 
 @utility upload {
-  @apply card items-center justify-center relative snap-center bg-base-200 transition ring-primary;
+  @apply card items-center justify-center relative snap-center bg-base-200 transition ring-primary overflow-hidden ellipsis;
 }
 
 :root {

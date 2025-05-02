@@ -261,8 +261,8 @@ defmodule OberonWeb.ProjectLive.Form do
 
   defp save_project(socket, :new, project_params) do
     uploaded_files =
-      consume_uploaded_entries(socket, :attachments, fn %{path: path}, entry ->
-        upload_file(path, entry)
+      consume_uploaded_entries(socket, :attachments, fn %{key: key}, entry ->
+        upload_file(key, entry)
       end)
 
     case Projects.create_project(
