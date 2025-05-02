@@ -50,11 +50,14 @@ defmodule Oberon.Projects.Attachment do
 
   def global_link(%__MODULE__{optimised_url: p, value: v}), do: global_link(p || v)
 
-  def global_link("s3:" <> object),
-    do:
-      Application.fetch_env!(:oberon, :s3)[:public_url]
-      |> URI.append_path(object |> URI.encode())
-      |> URI.to_string()
+  def global_link("s3:" <> object) do
+    # Application.fetch_env!(:oberon, :s3)[:public_url]
+    {:ok, url} =
+      ExAws.Config.new(:s3)
+      |> ExAws.S3.presigned_url(:get, Application.fetch_env!(:oberon, :s3)[:bucket_name], object)
+
+    url
+  end
 
   def global_link(v), do: v
 

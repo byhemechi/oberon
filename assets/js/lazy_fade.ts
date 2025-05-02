@@ -9,23 +9,23 @@ class LazyFadeIn extends HTMLElement {
         duration: 100,
         delay: 100,
         fill: "forwards",
-      }
+      },
     );
   }
   connectedCallback() {
-    if (!this.img || this.img.complete) return this.hidePlaceholder();
+    if (!this.img) {
+      throw "No image given as child to lazy-img";
+    }
+    if (this.img.complete) return this.hidePlaceholder();
 
-    const animation = this.img.animate(
-      [{ opacity: 0, "--tw-blur": "blur(8px)" }, { opacity: 1 }],
-      {
-        duration: 200,
-      }
-    );
+    const animation = this.img.animate([{ opacity: 0 }, { opacity: 1 }], {
+      duration: 200,
+    });
 
     animation.pause();
 
     this.img.addEventListener("load", () => animation.play(), { once: true });
-    animation.addEventListener("finish", this.hidePlaceholder);
+    animation.addEventListener("finish", () => this.hidePlaceholder());
   }
 }
 

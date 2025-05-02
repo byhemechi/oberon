@@ -14,12 +14,15 @@ defmodule OberonWeb.ProjectLive.Form do
   def presign_upload(entry, socket) do
     config = ExAws.Config.new(:s3)
     bucket = Application.fetch_env!(:oberon, :s3)[:bucket_name]
-    key = "/attachments/#{entry.uuid}/#{entry.client_name}"
+    key = "/attachments/#{entry.uuid}"
 
     {:ok, url} =
       ExAws.S3.presigned_url(config, :put, bucket, key,
         expires_in: 3600,
-        query_params: [{"Content-Type", entry.client_type}]
+        query_params: [
+          {"Content-Type", entry.client_type},
+          {"Content-Disposition", "inline;filename*=utf-8''#{URI.encode(entry.client_name)}"}
+        ]
       )
 
     {:ok, %{uploader: "S3", key: key, url: url}, socket}
