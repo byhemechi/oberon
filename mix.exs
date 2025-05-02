@@ -8,6 +8,7 @@ defmodule Oberon.MixProject do
       elixir: "~> 1.15",
       elixirc_paths: elixirc_paths(Mix.env()),
       start_permanent: Mix.env() == :prod,
+      consolidate_protocols: Mix.env() != :dev,
       aliases: aliases(),
       deps: deps(),
       listeners: [Phoenix.CodeReloader]
@@ -33,6 +34,8 @@ defmodule Oberon.MixProject do
   # Type `mix help deps` for examples and options.
   defp deps do
     [
+      {:oban, "~> 2.0"},
+      {:igniter, "~> 0.5", only: [:dev, :test]},
       {:argon2_elixir, "~> 4.0"},
       {:phoenix, "~> 1.8.0-rc.0", override: true},
       {:phoenix_ecto, "~> 4.5"},
@@ -62,7 +65,7 @@ defmodule Oberon.MixProject do
       {:bandit, "~> 1.5"},
       {:image, "~> 0.54.4"},
       {:ex_aws, "~> 2.0"},
-      {:ex_aws_s3, "~> 2.0"},
+      {:ex_aws_s3, "~> 2.0"}
     ]
   end
 

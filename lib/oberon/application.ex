@@ -11,6 +11,7 @@ defmodule Oberon.Application do
       OberonWeb.Telemetry,
       Oberon.Repo,
       {DNSCluster, query: Application.get_env(:oberon, :dns_cluster_query) || :ignore},
+      {Oban, Application.fetch_env!(:oberon, Oban)},
       {Phoenix.PubSub, name: Oberon.PubSub},
       # Start a worker by calling: Oberon.Worker.start_link(arg)
       # {Oberon.Worker, arg},

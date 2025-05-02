@@ -7,6 +7,12 @@
 # General application configuration
 import Config
 
+config :oberon, Oban,
+  engine: Oban.Engines.Basic,
+  notifier: Oban.Notifiers.Postgres,
+  queues: [default: 10],
+  repo: Oberon.Repo
+
 config :oberon, :scopes,
   user: [
     default: true,
