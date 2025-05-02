@@ -242,7 +242,7 @@ defmodule OberonWeb.ProjectLive.Form do
 
   defp upload_file(path, entry) do
     dest_dir = entry.uuid
-    dest_dir_full = Path.join("priv/static/uploads", dest_dir)
+    dest_dir_full = Path.join([:code.priv_dir(:oberon), "static/uploads", dest_dir])
     File.mkdir_p!(dest_dir_full)
 
     case Image.open(path) do
