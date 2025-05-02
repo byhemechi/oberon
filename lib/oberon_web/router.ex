@@ -1,6 +1,7 @@
 defmodule OberonWeb.Router do
   use OberonWeb, :router
 
+  import Oban.Web.Router
   import OberonWeb.UserAuth
 
   pipeline :browser do
@@ -43,6 +44,12 @@ defmodule OberonWeb.Router do
 
       live_dashboard "/dashboard", metrics: OberonWeb.Telemetry
       forward "/mailbox", Plug.Swoosh.MailboxPreview
+    end
+
+    scope "/" do
+      pipe_through :browser
+
+      oban_dashboard("/oban")
     end
   end
 

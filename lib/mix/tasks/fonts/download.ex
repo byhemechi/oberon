@@ -33,7 +33,6 @@ defmodule Mix.Tasks.Fonts.Download do
     sha_sum = :crypto.hash(:sha, tarball)
 
     if expected_sha_sum != sha_sum do
-      IO.inspect({expected_sha_sum, sha_sum})
       raise "Checksum did not match"
     else
       Logger.info("Checksum matched")

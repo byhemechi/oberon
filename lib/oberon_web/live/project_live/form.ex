@@ -14,7 +14,7 @@ defmodule OberonWeb.ProjectLive.Form do
   def presign_upload(entry, socket) do
     config = ExAws.Config.new(:s3)
     bucket = Application.fetch_env!(:oberon, :s3)[:bucket_name]
-    key = "attachments/#{entry.uuid}/#{entry.client_name}"
+    key = "/attachments/#{entry.uuid}/#{entry.client_name}"
 
     {:ok, url} =
       ExAws.S3.presigned_url(config, :put, bucket, key,
@@ -247,6 +247,9 @@ defmodule OberonWeb.ProjectLive.Form do
            project
          end) do
       {:ok, project} ->
+        Oberon.Jobs.GenerateProjectThumbnails.new(%{"project_id" => project.id})
+        |> Oban.insert()
+
         {:noreply,
          socket
          |> put_flash(:info, "Project updated successfully")
@@ -274,6 +277,9 @@ defmodule OberonWeb.ProjectLive.Form do
            )
          ) do
       {:ok, project} ->
+        Oberon.Jobs.GenerateProjectThumbnails.new(%{"project_id" => project.id})
+        |> Oban.insert()
+
         {:noreply,
          socket
          |> put_flash(:info, "Project created successfully")

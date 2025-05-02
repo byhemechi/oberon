@@ -65,7 +65,8 @@ defmodule Oberon.MixProject do
       {:bandit, "~> 1.5"},
       {:image, "~> 0.54.4"},
       {:ex_aws, "~> 2.0"},
-      {:ex_aws_s3, "~> 2.0"}
+      {:ex_aws_s3, "~> 2.0"},
+      {:oban_web, "~> 2.11"}
     ]
   end
 

@@ -77,7 +77,20 @@ defmodule OberonWeb.ProjectLive.Show do
                       data-role="placeholder"
                       class="size-full absolute inset-0 blur"
                     />
-                    <img alt={attachment.name} src={global_link(attachment.value)} class="size-full relative" />
+                    <img
+                      alt={attachment.name}
+                      src={global_link(attachment.value)}
+                      class="size-full relative"
+                      style={
+                        case attachment.dimensions do
+                          {x, y} ->
+                            "aspect-ratio: #{x} / #{y}; width: calc(var(--spacing) * 98 * #{x} / #{y}); height: calc(var(--spacing) * 98)"
+
+                          _ ->
+                            nil
+                        end
+                      }
+                    />
                   </lazy-img>
                 </figure>
               </a>
