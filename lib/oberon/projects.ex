@@ -19,16 +19,12 @@ defmodule Oberon.Projects do
     * {:deleted, %Project{}}
 
   """
-  def subscribe_projects(%Scope{} = scope) do
-    key = scope.user.id
-
-    Phoenix.PubSub.subscribe(Oberon.PubSub, "user:#{key}:projects")
+  def subscribe_projects(%Scope{} = _scope) do
+    Phoenix.PubSub.subscribe(Oberon.PubSub, "projects")
   end
 
-  defp broadcast(%Scope{} = scope, message) do
-    key = scope.user.id
-
-    Phoenix.PubSub.broadcast(Oberon.PubSub, "user:#{key}:projects", message)
+  defp broadcast(%Scope{} = _scope, message) do
+    Phoenix.PubSub.broadcast(Oberon.PubSub, "projects", message)
   end
 
   @doc """
@@ -243,5 +239,138 @@ defmodule Oberon.Projects do
   """
   def change_attachment(%Attachment{} = attachment, attrs \\ %{}) do
     Attachment.changeset(attachment, attrs)
+  end
+
+  alias Oberon.Projects.Vote
+  alias Oberon.Auth.Scope
+
+  @doc """
+  Subscribes to scoped notifications about any vote changes.
+
+  The broadcasted messages match the pattern:
+
+    * {:created, %Vote{}}
+    * {:updated, %Vote{}}
+    * {:deleted, %Vote{}}
+
+  """
+  def subscribe_vote(%Scope{} = scope) do
+    key = scope.user.id
+
+    Phoenix.PubSub.subscribe(Oberon.PubSub, "user:#{key}:vote")
+  end
+
+  @doc """
+  Returns the list of vote.
+
+  ## Examples
+
+      iex> list_vote(scope)
+      [%Vote{}, ...]
+
+  """
+  def list_vote(%Scope{} = scope) do
+    Repo.all(from vote in Vote, where: vote.user_id == ^scope.user.id)
+  end
+
+  @doc """
+  Gets a single vote.
+
+  Raises `Ecto.NoResultsError` if the Vote does not exist.
+
+  ## Examples
+
+      iex> get_vote!(123)
+      %Vote{}
+
+      iex> get_vote!(456)
+      ** (Ecto.NoResultsError)
+
+  """
+  def get_vote!(%Scope{} = scope, id) do
+    Repo.get_by!(Vote, id: id, user_id: scope.user.id)
+  end
+
+  @doc """
+  Creates a vote.
+
+  ## Examples
+
+      iex> create_vote(%{field: value})
+      {:ok, %Vote{}}
+
+      iex> create_vote(%{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def create_vote(%Scope{} = scope, attrs \\ %{}) do
+    with {:ok, vote = %Vote{}} <-
+           %Vote{}
+           |> Vote.changeset(attrs, scope)
+           |> Repo.insert() do
+      broadcast(scope, {:created, vote})
+      {:ok, vote}
+    end
+  end
+
+  @doc """
+  Updates a vote.
+
+  ## Examples
+
+      iex> update_vote(vote, %{field: new_value})
+      {:ok, %Vote{}}
+
+      iex> update_vote(vote, %{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def update_vote(%Scope{} = scope, %Vote{} = vote, attrs) do
+    true = vote.user_id == scope.user.id
+
+    with {:ok, vote = %Vote{}} <-
+           vote
+           |> Vote.changeset(attrs, scope)
+           |> Repo.update() do
+      broadcast(scope, {:updated, vote})
+      {:ok, vote}
+    end
+  end
+
+  @doc """
+  Deletes a vote.
+
+  ## Examples
+
+      iex> delete_vote(vote)
+      {:ok, %Vote{}}
+
+      iex> delete_vote(vote)
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def delete_vote(%Scope{} = scope, %Vote{} = vote) do
+    true = vote.user_id == scope.user.id
+
+    with {:ok, vote = %Vote{}} <-
+           Repo.delete(vote) do
+      broadcast(scope, {:deleted, vote})
+      {:ok, vote}
+    end
+  end
+
+  @doc """
+  Returns an `%Ecto.Changeset{}` for tracking vote changes.
+
+  ## Examples
+
+      iex> change_vote(vote)
+      %Ecto.Changeset{data: %Vote{}}
+
+  """
+  def change_vote(%Scope{} = scope, %Vote{} = vote, attrs \\ %{}) do
+    true = vote.user_id == scope.user.id
+
+    Vote.changeset(vote, attrs, scope)
   end
 end

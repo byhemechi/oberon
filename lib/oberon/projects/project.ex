@@ -31,6 +31,10 @@ defmodule Oberon.Projects.Project do
       on_replace: :delete,
       preload_order: [asc: :id]
 
+    has_many :votes, Oberon.Projects.Vote,
+      on_replace: :delete,
+      preload_order: [asc: :inserted_at]
+
     timestamps(type: :utc_datetime)
   end
 

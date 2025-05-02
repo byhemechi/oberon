@@ -35,4 +35,17 @@ defmodule Oberon.ProjectsFixtures do
 
     attachment
   end
+
+  @doc """
+  Generate a vote.
+  """
+  def vote_fixture(scope, attrs \\ %{}) do
+    attrs =
+      Enum.into(attrs, %{
+        vote_type: :approve
+      })
+
+    {:ok, vote} = Oberon.Projects.create_vote(scope, attrs)
+    vote
+  end
 end

@@ -153,4 +153,90 @@ defmodule Oberon.ProjectsTest do
       assert %Ecto.Changeset{} = Projects.change_attachment(attachment)
     end
   end
+
+  describe "vote" do
+    alias Oberon.Projects.Vote
+
+    import Oberon.AuthFixtures, only: [user_scope_fixture: 0]
+    import Oberon.ProjectsFixtures
+
+    @invalid_attrs %{vote_type: nil}
+
+    test "list_vote/1 returns all scoped vote" do
+      scope = user_scope_fixture()
+      other_scope = user_scope_fixture()
+      vote = vote_fixture(scope)
+      other_vote = vote_fixture(other_scope)
+      assert Projects.list_vote(scope) == [vote]
+      assert Projects.list_vote(other_scope) == [other_vote]
+    end
+
+    test "get_vote!/2 returns the vote with given id" do
+      scope = user_scope_fixture()
+      vote = vote_fixture(scope)
+      other_scope = user_scope_fixture()
+      assert Projects.get_vote!(scope, vote.id) == vote
+      assert_raise Ecto.NoResultsError, fn -> Projects.get_vote!(other_scope, vote.id) end
+    end
+
+    test "create_vote/2 with valid data creates a vote" do
+      valid_attrs = %{vote_type: :approve}
+      scope = user_scope_fixture()
+
+      assert {:ok, %Vote{} = vote} = Projects.create_vote(scope, valid_attrs)
+      assert vote.vote_type == :approve
+      assert vote.user_id == scope.user.id
+    end
+
+    test "create_vote/2 with invalid data returns error changeset" do
+      scope = user_scope_fixture()
+      assert {:error, %Ecto.Changeset{}} = Projects.create_vote(scope, @invalid_attrs)
+    end
+
+    test "update_vote/3 with valid data updates the vote" do
+      scope = user_scope_fixture()
+      vote = vote_fixture(scope)
+      update_attrs = %{vote_type: :disapprove}
+
+      assert {:ok, %Vote{} = vote} = Projects.update_vote(scope, vote, update_attrs)
+      assert vote.vote_type == :disapprove
+    end
+
+    test "update_vote/3 with invalid scope raises" do
+      scope = user_scope_fixture()
+      other_scope = user_scope_fixture()
+      vote = vote_fixture(scope)
+
+      assert_raise MatchError, fn ->
+        Projects.update_vote(other_scope, vote, %{})
+      end
+    end
+
+    test "update_vote/3 with invalid data returns error changeset" do
+      scope = user_scope_fixture()
+      vote = vote_fixture(scope)
+      assert {:error, %Ecto.Changeset{}} = Projects.update_vote(scope, vote, @invalid_attrs)
+      assert vote == Projects.get_vote!(scope, vote.id)
+    end
+
+    test "delete_vote/2 deletes the vote" do
+      scope = user_scope_fixture()
+      vote = vote_fixture(scope)
+      assert {:ok, %Vote{}} = Projects.delete_vote(scope, vote)
+      assert_raise Ecto.NoResultsError, fn -> Projects.get_vote!(scope, vote.id) end
+    end
+
+    test "delete_vote/2 with invalid scope raises" do
+      scope = user_scope_fixture()
+      other_scope = user_scope_fixture()
+      vote = vote_fixture(scope)
+      assert_raise MatchError, fn -> Projects.delete_vote(other_scope, vote) end
+    end
+
+    test "change_vote/2 returns a vote changeset" do
+      scope = user_scope_fixture()
+      vote = vote_fixture(scope)
+      assert %Ecto.Changeset{} = Projects.change_vote(scope, vote)
+    end
+  end
 end
