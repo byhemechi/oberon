@@ -9,6 +9,21 @@ defmodule OberonWeb.ProjectLive.Form do
   defp error_to_string(:too_large), do: "Too large"
   defp error_to_string(:not_accepted), do: "File type not supported"
   defp error_to_string(:too_many_files), do: "Too many files"
+  defp error_to_string(:external_client_failure), do: "External error"
+
+
+  def presign_upload(entry, socket) do
+    config = ExAws.Config.new(:s3)
+    bucket = Application.fetch_env!(:oberon, :s3)[:bucket_name]
+    key = "public/#{entry.client_name}"
+
+    {:ok, url} =
+      ExAws.S3.presigned_url(config, :put, bucket, key,
+        expires_in: 3600,
+        query_params: [{"Content-Type", entry.client_type}]
+      )
+     {:ok, %{uploader: "S3", key: key, url: url}, socket}
+  end
 
   @impl true
   def render(assigns) do
@@ -133,7 +148,8 @@ defmodule OberonWeb.ProjectLive.Form do
        accept: :any,
        max_file_size: 60_000_000,
        auto_upload: true,
-       max_entries: 5
+       max_entries: 5,
+       external: &presign_upload/2
      )
      |> apply_action(socket.assigns.live_action, params)}
   end
@@ -262,8 +278,19 @@ defmodule OberonWeb.ProjectLive.Form do
 
   defp save_project(socket, :edit, project_params) do
     uploaded_files =
-      consume_uploaded_entries(socket, :attachments, fn %{path: path}, entry ->
-        upload_file(path, entry)
+      consume_uploaded_entries(socket, :attachments, fn %{key: key}, entry ->
+
+        {:ok,
+         %{
+           "value" => "s3:" <> key,
+           "name" => entry.client_name,
+           "type" =>
+             if !is_nil(entry.client_type) && String.length(entry.client_type) > 0 do
+               entry.client_type
+             else
+               "application/octet-stream"
+             end
+         }}
       end)
 
     case Repo.transaction(fn ->

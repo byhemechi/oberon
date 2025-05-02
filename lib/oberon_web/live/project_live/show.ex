@@ -3,6 +3,9 @@ defmodule OberonWeb.ProjectLive.Show do
 
   alias Oberon.Projects
 
+  defp global_link("s3:" <> object), do: "https://s3.sadcloud.co/oberon/#{object}"
+  defp global_link(v), do: v
+
   @impl true
   def render(assigns) do
     ~H"""
@@ -46,7 +49,7 @@ defmodule OberonWeb.ProjectLive.Show do
           <%= case attachment do %>
             <% %{type: "link"} -> %>
               <a
-                href={attachment.value}
+                href={global_link(attachment.value)}
                 class="upload hover:upload-primary w-46 gap-2 items-center justify-center"
               >
                 <div class="card-title">
@@ -56,7 +59,7 @@ defmodule OberonWeb.ProjectLive.Show do
             <% %{placeholder: placeholder} when is_binary(placeholder) -> %>
               <a
                 class="upload  hover:upload-primary overflow-clip row-span-2 relative"
-                href={attachment.value}
+                href={global_link(attachment.value)}
                 style={
                   case attachment.dimensions do
                     {x, y} ->
@@ -76,13 +79,13 @@ defmodule OberonWeb.ProjectLive.Show do
                       data-role="placeholder"
                       class="size-full absolute inset-0 blur"
                     />
-                    <img alt={attachment.name} src={attachment.value} class="size-full relative" />
+                    <img alt={attachment.name} src={global_link(attachment.value)} class="size-full relative" />
                   </lazy-img>
                 </figure>
               </a>
             <% _ -> %>
               <a
-                href={attachment.value}
+                href={global_link(attachment.value)}
                 download={Path.basename(attachment.value)}
                 class="upload  hover:upload-primary w-46 gap-2 items-center justify-center"
               >

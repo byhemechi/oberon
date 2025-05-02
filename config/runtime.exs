@@ -20,6 +20,44 @@ if System.get_env("PHX_SERVER") do
   config :oberon, OberonWeb.Endpoint, server: true
 end
 
+
+s3_endpoint =
+  System.get_env("AWS_ENDPOINT_URL_S3")
+  |> case do
+    nil ->
+      URI.parse("https://s3.amazonaws.com/")
+
+    v ->
+      URI.parse(v)
+  end
+
+public_url =
+  case System.get_env("S3_PUBLIC_URL") do
+    nil ->
+      s3_endpoint |> URI.merge(System.get_env("BUCKET_NAME") <> "/")
+
+    v ->
+      URI.parse(v)
+  end
+
+config :oberon, :s3,
+  access_key_id: System.get_env("AWS_ACCESS_KEY_ID"),
+  secret_access_key: System.get_env("AWS_ACCESS_KEY_ID"),
+  region: System.get_env("AWS_REGION"),
+  bucket_name: System.get_env("BUCKET_NAME"),
+  endpoint: s3_endpoint |> URI.to_string(),
+  service: :s3,
+  public_url: public_url
+
+config :ex_aws,
+  access_key_id: [{:system, "AWS_ACCESS_KEY_ID"}, :instance_role],
+  secret_access_key: [{:system, "AWS_SECRET_ACCESS_KEY"}, :instance_role]
+
+config :ex_aws, :s3,
+  scheme: s3_endpoint.scheme <> "://",
+  host: s3_endpoint.host,
+  port: s3_endpoint.port
+
 if config_env() == :prod do
   database_url =
     System.get_env("DATABASE_URL") ||
