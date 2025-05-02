@@ -9,7 +9,7 @@ defmodule Oberon.Jobs.GenerateProjectThumbnails do
 
     attachments = from(a in Attachment, where: a.project_id == ^project_id) |> Repo.all()
 
-    for %Attachment{type: "image/" <> _, placeholder: nil, id: id} <- attachments do
+    for %Attachment{type: "image/" <> _, optimised_url: nil, id: id} <- attachments do
       Oberon.Jobs.ImageThumbnail.new(%{"attachment_id" => id}) |> Oban.insert()
     end
 

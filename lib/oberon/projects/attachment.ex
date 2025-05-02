@@ -39,6 +39,7 @@ defmodule Oberon.Projects.Attachment do
   schema "attachments" do
     field :name, :string
     field :value, :string
+    field :optimised_url, :string
     field :type, :string
     field :placeholder, :string
     field :project_id, :id
@@ -47,21 +48,20 @@ defmodule Oberon.Projects.Attachment do
     timestamps(type: :utc_datetime)
   end
 
-  def global_link(%__MODULE__{value: v}), do: global_link(v)
+  def global_link(%__MODULE__{optimised_url: p, value: v}), do: global_link(p || v)
 
   def global_link("s3:" <> object),
     do:
       Application.fetch_env!(:oberon, :s3)[:public_url]
       |> URI.append_path(object |> URI.encode())
       |> URI.to_string()
-      |> IO.inspect()
 
   def global_link(v), do: v
 
   @doc false
   def changeset(attachment, attrs) do
     attachment
-    |> cast(attrs, [:name, :value, :type, :placeholder, :dimensions])
+    |> cast(attrs, [:name, :value, :optimised_url, :type, :placeholder, :dimensions])
     |> validate_required([:name, :value, :type])
   end
 end

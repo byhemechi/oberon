@@ -66,7 +66,8 @@ defmodule Oberon.MixProject do
       {:image, "~> 0.54.4"},
       {:ex_aws, "~> 2.0"},
       {:ex_aws_s3, "~> 2.0"},
-      {:oban_web, "~> 2.11"}
+      {:oban_web, "~> 2.11"},
+      {:hackney, "~> 1.23"}
     ]
   end
 

@@ -17,25 +17,47 @@ defmodule Oberon.Jobs.ImageThumbnail do
     image =
       Image.open(temp_file)
 
-    case image do
-      {:ok, image} ->
-        placeholder =
+    status =
+      case image do
+        {:ok, image} ->
+          dimensions =
+            {width = Vix.Vips.Image.width(image), height = Vix.Vips.Image.height(image)}
+
+          placeholder =
+            image
+            |> Image.thumbnail!(64)
+            |> Image.write!(:memory, suffix: ".webp")
+
+          optimised_path = "optimised/#{Ecto.UUID.generate()}.webp"
+
           image
-          |> Image.thumbnail!(64)
-          |> Image.write!(:memory, suffix: ".webp")
+          |> Image.thumbnail!(width)
+          |> Image.stream!(suffix: ".webp", buffer_size: 5_242_880)
+          |> ExAws.S3.upload(
+            Application.fetch_env!(:oberon, :s3)[:bucket_name],
+            optimised_path,
+            content_type: "image/webp"
+          )
+          |> ExAws.request!()
 
-        dimensions = {Vix.Vips.Image.width(image), Vix.Vips.Image.height(image)}
+          {status, _v} =
+            attachment
+            |> Attachment.changeset(%{
+              "placeholder" => placeholder,
+              "dimensions" => dimensions,
+              "optimised_url" => "s3:/" <> optimised_path
+            })
+            |> Map.put(:action, :update)
+            |> Repo.update()
 
-        {status, _v} =
-          attachment
-          |> Attachment.changeset(%{"placeholder" => placeholder, "dimensions" => dimensions})
-          |> Map.put(:action, :update)
-          |> Repo.update()
+          status
 
-        status
+        _ ->
+          :ok
+      end
 
-      _ ->
-        :ok
-    end
+    File.rm_rf!(temp_dir)
+
+    status
   end
 end

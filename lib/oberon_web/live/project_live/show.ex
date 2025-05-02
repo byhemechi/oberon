@@ -79,7 +79,7 @@ defmodule OberonWeb.ProjectLive.Show do
                     />
                     <img
                       alt={attachment.name}
-                      src={global_link(attachment.value)}
+                      src={global_link(attachment)}
                       class="size-full relative"
                       style={
                         case attachment.dimensions do
