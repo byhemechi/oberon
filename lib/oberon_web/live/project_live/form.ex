@@ -11,18 +11,18 @@ defmodule OberonWeb.ProjectLive.Form do
   defp error_to_string(:too_many_files), do: "Too many files"
   defp error_to_string(:external_client_failure), do: "External error"
 
-
   def presign_upload(entry, socket) do
     config = ExAws.Config.new(:s3)
     bucket = Application.fetch_env!(:oberon, :s3)[:bucket_name]
-    key = "public/#{entry.client_name}"
+    key = "attachments/#{entry.uuid}/#{entry.client_name}"
 
     {:ok, url} =
       ExAws.S3.presigned_url(config, :put, bucket, key,
         expires_in: 3600,
         query_params: [{"Content-Type", entry.client_type}]
       )
-     {:ok, %{uploader: "S3", key: key, url: url}, socket}
+
+    {:ok, %{uploader: "S3", key: key, url: url}, socket}
   end
 
   @impl true
@@ -201,51 +201,10 @@ defmodule OberonWeb.ProjectLive.Form do
     save_project(socket, socket.assigns.live_action, project_params)
   end
 
-  defp upload_image(path, image, link_dir, dest_dir, entry) do
-    file_name = Path.rootname(entry.client_name) <> ".webp"
-    dest = Path.join(link_dir, file_name)
-
-    File.cp!(
-      path,
-      Path.join(
-        dest_dir,
-        Path.rootname(entry.client_name) <> "-orig" <> Path.extname(entry.client_name)
-      )
-    )
-
-    image =
-      image
-      |> Image.thumbnail!(Vix.Vips.Image.width(image))
-
-    width = Vix.Vips.Image.width(image)
-    image |> Image.write!(Path.join(dest_dir, file_name))
-
+  defp upload_file(key, entry) do
     {:ok,
      %{
-       "value" => ~p"/uploads/" <> dest,
-       "name" => entry.client_name,
-       "type" =>
-         if !is_nil(entry.client_type) && String.length(entry.client_type) > 0 do
-           entry.client_type
-         else
-           "application/octet-stream"
-         end,
-       "dimensions" => {width, Vix.Vips.Image.height(image)},
-       "placeholder" =>
-         image
-         |> Image.thumbnail!(64)
-         |> Image.write!(:memory, suffix: ".webp")
-     }}
-  end
-
-  defp upload_unknown_file(path, link_dir, dest_dir, entry) do
-    dest = Path.join(link_dir, entry.client_name)
-    dest_full = Path.join(dest_dir, entry.client_name)
-    File.cp!(path, dest_full)
-
-    {:ok,
-     %{
-       "value" => ~p"/uploads/" <> dest,
+       "value" => "s3:" <> key,
        "name" => entry.client_name,
        "type" =>
          if !is_nil(entry.client_type) && String.length(entry.client_type) > 0 do
@@ -256,41 +215,10 @@ defmodule OberonWeb.ProjectLive.Form do
      }}
   end
 
-  defp upload_file(path, entry) do
-    dest_dir = entry.uuid
-    dest_dir_full = Path.join([:code.priv_dir(:oberon), "static/uploads", dest_dir])
-    File.mkdir_p!(dest_dir_full)
-
-    case Image.open(path) do
-      {:ok, image} ->
-        case Vix.Vips.Image.header_value(image, "vips-loader") do
-          {:ok, "heifload"} ->
-            upload_unknown_file(path, dest_dir, dest_dir_full, entry)
-
-          _ ->
-            upload_image(path, image, dest_dir, dest_dir_full, entry)
-        end
-
-      _ ->
-        upload_unknown_file(path, dest_dir, dest_dir_full, entry)
-    end
-  end
-
   defp save_project(socket, :edit, project_params) do
     uploaded_files =
       consume_uploaded_entries(socket, :attachments, fn %{key: key}, entry ->
-
-        {:ok,
-         %{
-           "value" => "s3:" <> key,
-           "name" => entry.client_name,
-           "type" =>
-             if !is_nil(entry.client_type) && String.length(entry.client_type) > 0 do
-               entry.client_type
-             else
-               "application/octet-stream"
-             end
-         }}
+        upload_file(key, entry)
       end)
 
     case Repo.transaction(fn ->
