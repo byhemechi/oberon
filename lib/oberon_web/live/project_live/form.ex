@@ -250,7 +250,7 @@ defmodule OberonWeb.ProjectLive.Form do
            project
          end) do
       {:ok, project} ->
-        Oberon.Jobs.GenerateProjectThumbnails.new(%{"project_id" => project.id})
+        Oberon.Jobs.ThumbnailScan.new(%{})
         |> Oban.insert()
 
         {:noreply,
@@ -280,7 +280,7 @@ defmodule OberonWeb.ProjectLive.Form do
            )
          ) do
       {:ok, project} ->
-        Oberon.Jobs.GenerateProjectThumbnails.new(%{"project_id" => project.id})
+        Oberon.Jobs.ThumbnailScan.new(%{})
         |> Oban.insert()
 
         {:noreply,

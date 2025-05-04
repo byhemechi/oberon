@@ -42,6 +42,7 @@ defmodule Oberon.Projects.Attachment do
     field :optimised_url, :string
     field :type, :string
     field :placeholder, :string
+    field :should_optimise, :boolean, default: false
     belongs_to :project, Oberon.Projects.Project
     field :dimensions, __MODULE__.Dimensions
 
@@ -63,7 +64,15 @@ defmodule Oberon.Projects.Attachment do
   @doc false
   def changeset(attachment, attrs) do
     attachment
-    |> cast(attrs, [:name, :value, :optimised_url, :type, :placeholder, :dimensions])
+    |> cast(attrs, [
+      :name,
+      :value,
+      :optimised_url,
+      :type,
+      :placeholder,
+      :dimensions,
+      :should_optimise
+    ])
     |> validate_required([:name, :value, :type])
   end
 end

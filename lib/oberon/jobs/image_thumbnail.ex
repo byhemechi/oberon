@@ -2,7 +2,7 @@ defmodule Oberon.Jobs.ImageThumbnail do
   alias Oberon.Repo
   alias Oberon.Projects.Attachment
   alias Oberon.Projects
-  use Oban.Worker
+  use Oban.Worker, unique: [keys: [:attachment_id]]
 
   @impl Oban.Worker
   def perform(%Oban.Job{args: %{"attachment_id" => attachment_id} = _args, id: job_id}) do
@@ -20,8 +20,8 @@ defmodule Oberon.Jobs.ImageThumbnail do
     status =
       case image do
         {:ok, image} ->
-          dimensions =
-            {width = Vix.Vips.Image.width(image), height = Vix.Vips.Image.height(image)}
+          width = Vix.Vips.Image.width(image)
+          height = Vix.Vips.Image.height(image)
 
           placeholder =
             image
@@ -31,7 +31,7 @@ defmodule Oberon.Jobs.ImageThumbnail do
           optimised_path = "optimised/#{Ecto.UUID.generate()}.webp"
 
           image
-          |> Image.thumbnail!(width)
+          |> Image.thumbnail!("1200x784")
           |> Image.stream!(suffix: ".webp", buffer_size: 5_242_880)
           |> ExAws.S3.upload(
             Application.fetch_env!(:oberon, :s3)[:bucket_name],
@@ -44,8 +44,9 @@ defmodule Oberon.Jobs.ImageThumbnail do
             attachment
             |> Attachment.changeset(%{
               "placeholder" => placeholder,
-              "dimensions" => dimensions,
-              "optimised_url" => "s3:/" <> optimised_path
+              "dimensions" => {width, height},
+              "optimised_url" => "s3:/" <> optimised_path,
+              "should_optimise" => false
             })
             |> Map.put(:action, :update)
             |> Repo.update()
