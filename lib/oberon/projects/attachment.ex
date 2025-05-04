@@ -42,7 +42,7 @@ defmodule Oberon.Projects.Attachment do
     field :optimised_url, :string
     field :type, :string
     field :placeholder, :string
-    field :project_id, :id
+    belongs_to :project, Oberon.Projects.Project
     field :dimensions, __MODULE__.Dimensions
 
     timestamps(type: :utc_datetime)
@@ -51,7 +51,6 @@ defmodule Oberon.Projects.Attachment do
   def global_link(%__MODULE__{optimised_url: p, value: v}), do: global_link(p || v)
 
   def global_link("s3:" <> object) do
-    # Application.fetch_env!(:oberon, :s3)[:public_url]
     {:ok, url} =
       ExAws.Config.new(:s3)
       |> ExAws.S3.presigned_url(:get, Application.fetch_env!(:oberon, :s3)[:bucket_name], object)

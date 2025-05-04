@@ -58,7 +58,7 @@ defmodule Oberon.Projects do
       ** (Ecto.NoResultsError)
 
   """
-  def get_project!(%Scope{}, id) do
+  def get_project!(id) do
     Repo.get_by!(Project |> preload([:user, :attachments]), id: id)
   end
 

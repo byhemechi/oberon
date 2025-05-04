@@ -66,7 +66,7 @@ defmodule OberonWeb.ProjectLive.Index do
 
   @impl true
   def handle_event("delete", %{"id" => id}, socket) do
-    project = Projects.get_project!(socket.assigns.current_scope, id)
+    project = Projects.get_project!(id)
     {:ok, _} = Projects.delete_project(socket.assigns.current_scope, project)
 
     {:noreply, stream_delete(socket, :projects, project)}

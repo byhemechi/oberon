@@ -128,7 +128,7 @@ defmodule OberonWeb.ProjectLive.Show do
      socket
      |> assign(:page_title, "Show Project")
      |> assign(:route, :projects)
-     |> assign(:project, Projects.get_project!(socket.assigns.current_scope, id))}
+     |> assign(:project, Projects.get_project!(id))}
   end
 
   @impl true

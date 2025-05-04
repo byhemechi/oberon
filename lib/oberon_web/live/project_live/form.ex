@@ -161,7 +161,7 @@ defmodule OberonWeb.ProjectLive.Form do
   defp return_to(_), do: "index"
 
   defp apply_action(socket, :edit, %{"id" => id}) do
-    project = Projects.get_project!(socket.assigns.current_scope, id)
+    project = Projects.get_project!(id)
 
     socket
     |> assign(:page_title, "Edit Project")

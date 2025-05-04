@@ -50,6 +50,12 @@ defmodule Oberon.Jobs.ImageThumbnail do
             |> Map.put(:action, :update)
             |> Repo.update()
 
+          Phoenix.PubSub.broadcast(
+            Oberon.PubSub,
+            "projects",
+            {:updated, Projects.get_project!(attachment.project_id)}
+          )
+
           status
 
         _ ->
